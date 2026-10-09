@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>TERMO ∞ — Termo, Dueto e Quarteto</title>
+<meta name="description" content="Jogo de palavras em português com partidas ilimitadas: Termo, Dueto e Quarteto.">
+<meta name="theme-color" content="#15141c">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%232fae8f'/%3E%3Ctext x='50' y='72' font-size='64' font-weight='900' font-family='Arial' fill='white' text-anchor='middle'%3ET%3C/text%3E%3C/svg%3E">
+<style>
+:root{
+  --bg:#15141c;--bg2:#1e1d28;--fg:#f2f0f8;--muted:#8d89a3;
+  --tile-border:#35334a;--tile-cur:#57546f;--accent:#9d8cff;
+  --key:#2a2838;--key-fg:#eceaf5;
+  --c:#2fae8f;--p:#e0ad45;--a:#2c2a38;--a-fg:#6f6b86;
+  --t:60px;
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+}
+body.light{
+  --bg:#f3f2f8;--bg2:#ffffff;--fg:#1c1a26;--muted:#6b6780;
+  --tile-border:#d3d0e0;--tile-cur:#9e99b8;--accent:#6c55f0;
+  --key:#e1dfeb;--key-fg:#1c1a26;--a:#8f8aa6;--a-fg:#ffffff;
+}
+body.cb{--c:#f5793a;--p:#4fa3f7}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(--fg)}
+#app{display:flex;flex-direction:column;width:100vw;height:100vh;height:100dvh}
+
+/* HEADER */
+header{flex:0 0 auto;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--tile-border)}
+.hl,.hr{display:flex;gap:6px;align-items:center}
+.hr{justify-content:flex-end}
+.logo{font-weight:900;letter-spacing:.12em;font-size:18px;margin-left:6px;white-space:nowrap}
+.logo b{color:var(--accent)}
+.ib{width:38px;height:38px;border-radius:10px;border:1px solid var(--tile-border);background:var(--bg2);color:var(--fg);display:grid;place-items:center;cursor:pointer;transition:.15s}
+.ib:hover{border-color:var(--accent);color:var(--accent)}
+.ib svg{width:20px;height:20px}
+#modes{display:flex;background:var(--bg2);border:1px solid var(--tile-border);border-radius:12px;padding:3px;gap:2px}
+#modes button{border:0;background:transparent;color:var(--muted);font-weight:800;font-size:14px;padding:8px 14px;border-radius:9px;cursor:pointer;letter-spacing:.03em;transition:.15s}
+#modes button.on{background:var(--accent);color:#fff}
+#modes button:not(.on):hover{color:var(--fg)}
+.nm{display:flex;align-items:center;gap:6px;height:38px;padding:0 10px;border-radius:10px;border:1px solid var(--tile-border);background:var(--bg2);color:var(--muted);transition:.15s}
+.nm:focus-within{border-color:var(--accent);color:var(--accent)}
+.nm.need{border-color:var(--p);color:var(--p)}
+.nm svg{width:18px;height:18px;flex:0 0 auto}
+.nm input{width:110px;border:0;outline:0;background:transparent;color:var(--fg);font:700 14px/1 inherit;font-family:inherit;min-width:0}
+.nm input::placeholder{color:var(--muted);font-weight:600}
+/* telas menores: modos descem para uma 2ª linha e o nome ocupa o espaço livre */
+@media (max-width:860px){header{grid-template-columns:auto 1fr;row-gap:6px}#modes{grid-row:2;grid-column:1/-1;justify-self:center}.hr .nm{flex:1 1 auto;max-width:240px}.nm input{width:100%}}
+@media (max-width:560px){.logo{display:none}#modes button{padding:7px 9px;font-size:13px}.ib{width:34px;height:34px}header{padding:6px 8px}.nm{height:34px;padding:0 9px}.nm input{font-size:13px}}
+
+/* RANKING */
+.rk-tabs{display:flex;gap:6px;margin:4px 0 14px}
+.rk-tabs button{flex:1;border:1px solid var(--tile-border);background:transparent;color:var(--muted);font:800 14px inherit;font-family:inherit;padding:9px;border-radius:10px;cursor:pointer}
+.rk-tabs button.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.rk{width:100%;border-collapse:collapse;font-size:14px}
+.rk th{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.08em;font-weight:700;padding:0 6px 8px;text-align:right}
+.rk td{padding:9px 6px;border-top:1px solid var(--tile-border);text-align:right;font-variant-numeric:tabular-nums}
+.rk th:nth-child(2),.rk td:nth-child(2){text-align:left;width:100%}
+.rk td:first-child{text-align:center;font-weight:800;color:var(--muted);width:32px}
+.rk td:nth-child(2){font-weight:800;max-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rk tr.me td{background:color-mix(in srgb,var(--accent) 16%,transparent)}
+.rk-msg{color:var(--muted);text-align:center;padding:24px 0;font-size:15px}
+
+/* BOARDS */
+#main{flex:1 1 auto;min-height:0;display:flex;align-items:center;justify-content:center;padding:12px;position:relative}
+#boards{display:grid;gap:calc(var(--t)*.8);justify-content:center;align-content:center}
+.board{display:grid;gap:calc(var(--t)*.12);position:relative;border-radius:calc(var(--t)*.2);transition:opacity .3s}
+.row{display:grid;grid-template-columns:repeat(5,var(--t));gap:calc(var(--t)*.12)}
+.tile{width:var(--t);height:var(--t);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:calc(var(--t)*.56);line-height:1;border-radius:calc(var(--t)*.14);border:max(2px,calc(var(--t)*.055)) solid var(--tile-border);color:var(--fg);text-transform:uppercase;user-select:none}
+.tile.empty{opacity:.55}
+.tile.cur{border-color:var(--tile-cur);cursor:pointer}
+.tile.cur:hover{border-color:var(--accent)}
+.tile.cursor{border-color:var(--accent);border-bottom-width:max(5px,calc(var(--t)*.16))}
+.tile.filled{animation:pop .12s ease-out}
+.tile.c{background:var(--c);border-color:var(--c);color:#fff}
+.tile.p{background:var(--p);border-color:var(--p);color:#fff}
+.tile.a{background:var(--a);border-color:var(--a);color:var(--a-fg)}
+.tile.off{border-color:transparent;background:var(--bg2);opacity:.35}
+.tile.flip{animation:flip .5s ease both;transition:background-color 0s,border-color 0s,color 0s}
+.tile.bounce{animation:bounce .5s ease}
+.row.shake{animation:shake .45s}
+.board.done{opacity:.92}
+.ans{position:absolute;left:0;right:0;bottom:calc(var(--t)*-.1);transform:translateY(100%);text-align:center;font-weight:900;letter-spacing:.2em;font-size:max(13px,calc(var(--t)*.32));color:var(--p);text-transform:uppercase;pointer-events:none}
+@keyframes pop{0%{transform:scale(.85)}60%{transform:scale(1.08)}100%{transform:scale(1)}}
+@keyframes flip{0%{transform:rotateX(0)}50%{transform:rotateX(90deg)}100%{transform:rotateX(0)}}
+@keyframes bounce{0%,100%{transform:translateY(0)}40%{transform:translateY(-30%)}70%{transform:translateY(5%)}}
+@keyframes shake{10%,90%{transform:translateX(-2px)}20%,80%{transform:translateX(4px)}30%,50%,70%{transform:translateX(-7px)}40%,60%{transform:translateX(7px)}}
+
+/* KEYBOARD */
+#kb{flex:0 0 auto;width:min(100%,880px);margin:0 auto;padding:6px 8px calc(10px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:6px}
+.krow{display:flex;gap:6px}
+.key{flex:1;min-width:0;height:clamp(44px,7.4vh,68px);border:0;border-radius:9px;background:var(--key);color:var(--key-fg);font-weight:800;font-size:clamp(14px,2.3vh,21px);text-transform:uppercase;position:relative;overflow:hidden;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .08s,filter .15s;font-family:inherit}
+.key:hover{filter:brightness(1.15)}
+.key:active{transform:scale(.94)}
+.key.wide{flex:1.9;font-size:clamp(12px,1.9vh,17px)}
+.key .seg{position:absolute;transition:background .3s}
+.key span{position:relative;z-index:1}
+.key.lit span{color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.35)}
+.key.dead{opacity:.4}
+.key svg{width:24px;height:24px;position:relative;z-index:1}
+.spacer{flex:.5}
+.seg.c{background:var(--c)}.seg.p{background:var(--p)}.seg.a{background:var(--a)}
+
+/* TOAST */
+#toast{position:fixed;top:72px;left:50%;transform:translateX(-50%);z-index:50;display:flex;flex-direction:column;gap:6px;align-items:center;pointer-events:none}
+.tm{background:var(--fg);color:var(--bg);font-weight:700;padding:10px 16px;border-radius:10px;font-size:15px;animation:tin .15s ease-out;box-shadow:0 6px 20px rgba(0,0,0,.3)}
+@keyframes tin{from{opacity:0;transform:translateY(-6px)}}
+
+/* MODAL */
+.ov{position:fixed;inset:0;background:rgba(8,8,14,.6);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:40;padding:16px;animation:fade .2s}
+.ov.hidden{display:none}
+@keyframes fade{from{opacity:0}}
+.card{background:var(--bg2);border:1px solid var(--tile-border);border-radius:18px;max-width:520px;width:100%;max-height:90vh;overflow:auto;padding:24px;position:relative;animation:up .25s ease-out;box-shadow:0 20px 60px rgba(0,0,0,.4)}
+@keyframes up{from{transform:translateY(20px);opacity:0}}
+.card h2{margin:0 0 12px;font-size:22px}
+.card h3{margin:18px 0 8px;font-size:14px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
+.card p,.card li{line-height:1.5;color:var(--fg);font-size:15px}
+.card ul{padding-left:20px;margin:6px 0}
+.x{position:absolute;top:12px;right:12px}
+.ex{display:flex;gap:5px;margin:8px 0 4px;--t:40px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;text-align:center}
+.stats div b{display:block;font-size:28px}
+.stats div small{color:var(--muted);font-size:12px}
+.dist{display:flex;flex-direction:column;gap:4px}
+.dist .dr{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700}
+.dist .dr span:first-child{width:18px;text-align:right}
+.dist .bar{background:var(--a);color:#fff;padding:3px 8px;border-radius:5px;text-align:right;min-width:26px}
+.dist .bar.hi{background:var(--c)}
+.btns{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap}
+.btn{flex:1;border:0;border-radius:12px;padding:14px;font-weight:800;font-size:15px;cursor:pointer;background:var(--key);color:var(--fg);font-family:inherit}
+.btn.pri{background:var(--accent);color:#fff}
+.btn:hover{filter:brightness(1.1)}
+.words{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+.wd{padding:8px 12px;border-radius:10px;font-weight:900;letter-spacing:.15em;text-transform:uppercase;background:var(--a);color:#fff}
+.wd.ok{background:var(--c)}
+.tg{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 0;border-bottom:1px solid var(--tile-border)}
+.tg div small{display:block;color:var(--muted);font-size:13px;margin-top:2px}
+.sw{position:relative;width:48px;height:28px;flex:0 0 auto}
+.sw input{opacity:0;width:0;height:0}
+.sw i{position:absolute;inset:0;background:var(--key);border-radius:99px;cursor:pointer;transition:.2s}
+.sw i::after{content:"";position:absolute;width:22px;height:22px;left:3px;top:3px;border-radius:50%;background:#fff;transition:.2s}
+.sw input:checked+i{background:var(--accent)}
+.sw input:checked+i::after{transform:translateX(20px)}
+kbd{background:var(--key);border-radius:5px;padding:1px 6px;font-size:13px;font-family:inherit}
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div class="hl">
+      <button class="ib" id="bHelp" title="Como jogar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3"/><circle cx="12" cy="17" r=".6" fill="currentColor"/></svg></button>
+      <span class="logo">TERMO <b>∞</b></span>
+    </div>
+    <nav id="modes">
+      <button data-n="1">Termo</button>
+      <button data-n="2">Dueto</button>
+      <button data-n="4">Quarteto</button>
+    </nav>
+    <div class="hr">
+      <label class="nm" id="nmBox" title="Seu nome no ranking"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><input id="nome" type="text" maxlength="20" placeholder="Seu nome" autocomplete="nickname" spellcheck="false"></label>
+      <button class="ib" id="bNew" title="Nova palavra"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 4v5h-5"/></svg></button>
+      <button class="ib" id="bRank" title="Ranking"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M7 6H4v1a3 3 0 0 0 3 3M17 6h3v1a3 3 0 0 1-3 3"/></svg></button>
+      <button class="ib" id="bStats" title="Estatísticas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 20V11M12 20V4M19 20v-6"/></svg></button>
+      <button class="ib" id="bSet" title="Configurações"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
+    </div>
+  </header>
+  <main id="main"><div id="boards"></div></main>
+  <div id="kb"></div>
+</div>
+<div id="toast"></div>
+<div class="ov hidden" id="ov"><div class="card"><button class="ib x" id="bClose">✕</button><div id="mc"></div></div></div>
+
+<script>
+const RAW = `termo sagaz negro êxito mexer nobre senso afeto algoz ética plena fazer tênue mútua assim vigor sutil aquém porém fosse sobre cerne audaz ideia poder moral sanar desde torpe muito justo honra fútil quiçá sonho razão amigo ícone etnia égide tange lapso expor haver tempo então seção casal boçal ânimo dengo anexo pesar saber dizer causa genro ainda crivo obter ânsia graça sendo cozer estar comum prole detém digno temor ceder mundo pauta forte ardil óbice gleba tenaz visar jeito pudor apraz velho vício feliz favor herói juízo homem noção ávido culto criar sábio tédio levar desse afago casta sério ordem falar citar parvo anelo reter âmago
+alado abrir acaso achar aceno acima adeus advir afins aguda ajuda algum aliás amado ambos amora andar antes apego apelo aroma arroz assar atrás atual autor avião baixo balde banco banho barco barro beijo bicho blusa bolsa bomba bonde braço brava breve brisa bruma bruxa burro cabra caixa calma calor campo canal canto capaz carne carro carta casca cauda cavar cedro certo chave chefe cheio choro chuva cinco circo clara clima cobra coisa conto corpo costa couro cravo crise cruel curso curto dança dente doces doido drama duplo durar época errar etapa exame faixa falha farol fatia fauna febre feira festa fibra ficar filho final firme flora fluxo focar fogão folha fonte força forma forno frase frade fraco fruta fugir fumar fundo furar gaita galho ganho garfo garra gente gesto girar globo golpe gordo gosto grama grave grito grupo guiar haste hiato hotel humor idade igual ilhas imune jogar jovem juros justa labor lados lápis largo lavar leite lenço lenda lento letra leves limão limpo linha lista livre livro lobos local longe louco lousa lugar lunar luvas macio magia magro maior malha manga mania manso manto marca março massa matar medir meios melão menor menos mente mesmo metal metro milho mimos misto moeda molho monte morar morte mosca motor mover mudar museu nadar nariz naval navio ninho nível noite norte notas nuvem obras olhar ombro ondas órgão ostra ouvir padre pagar palco palma papel parar parte passo pasta patos pedra peixe perto pesca piano pilha pinho pista placa plano pleno pobre poeta ponte porco porta posse pouco prado praia prata prato prazo preço prova pular pulso quase queda quilo raiva ramos rampa rapaz raros ratos regra reino remar rente resto rezar rigor risco ritmo rocha rodas rolar roupa rubro ruído rumor sabão sabor salto samba santo sapos sauna seiva selva senha setor sexta sinal sítio sobra solar solto sopro suave subir sujar sumir surdo susto talco tarde tecla tecer telha tenda tênis terra teste texto tigre tinta tirar toldo tomar torre total touro traço trama trato trevo treze tribo trigo tropa trufa turma turno úmido unhas único urubu usina vagas valor vapor vasto velas venda vento verão verbo verde vidro vinho viola virar vírus visão vista viver vozes zebra zinco zonas
+amplo anual apoio bravo calmo carga claro cópia crime culpa dados débil dever exato falso farsa fatal fatos feroz grato hábil ideal impor jurar legal lesão meigo ótimo óbvio pacto pardo pavor plebe prumo rival rouco saúde sótão tarja tosco tumba turvo vazio vilão vulgo zelar
+aluno árabe atlas atriz banda barba beira bolha bolso brabo cacto caldo canoa capim causo cesto chapa chata cheque clube cofre colar coral corda corte cozer creme cueca dardo disco dobra duelo ducha dueto ermos farda farto fatal fenda ferro filme fitas flash fofoca frevo frito fúria galão garoa geada gemer gibão golfe gruta guelra harpa horta hífen ímpar índio jarra jaula joelho junho julho lagoa laico lanche larva laudo lesma leque licor lindo lixão lombo lótus louça lucro maçã maluco manha mangue manta marco mares mecha menta milha missa moita moldo nervo nicho nobel ócio olhos oeste ônibus orelha pacto palha panda pegar pérola pinça pingo pizza plumo poema polvo praga prosa pudim queijo quina rádio ramal recém redes reles renda roçar rosto rugir saída salmo sarau selar sinos sobra sonda sopas sueca surfe tacho talha tanga tatus tchau terço tesla tocha tolos trapo trono ursos vaiar valsa varal vareta vespa vigia vitae vulto xampu`;
+const strip=s=>s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+const DICT=new Map();
+RAW.split(/\s+/).forEach(w=>{w=w.trim().toLowerCase().normalize('NFC');const n=strip(w);if(/^[a-z]{5}$/.test(n)&&!DICT.has(n))DICT.set(n,w)});
+['vitae','flash','nobel','tesla','moldo','plumo'].forEach(w=>DICT.delete(w)); // estrangeirismos/raras fora das respostas
+const WORDS=[...DICT.keys()];
+
+/* DICIONÁRIO COMPLETO: ~320 mil palavras (LibreOffice pt_BR) carregadas do GitHub */
+/* Várias fontes combinadas: léxico + plurais/flexões (corpus) + todas as conjugações verbais */
+const GH='https://raw.githubusercontent.com/';
+const SOURCES=[
+  GH+'pythonprobr/palavras/master/palavras.txt',            // léxico base (LibreOffice)
+  GH+'fserb/pt-br/master/lexico',                           // 145 mil entradas
+  GH+'fserb/pt-br/master/icf',                              // 419 mil formas reais (plurais, femininos…)
+  GH+'fserb/pt-br/master/'+encodeURIComponent('conjugações') // 195 mil formas verbais
+];
+const FULL=new Map(DICT);let dictReady=false,dictTries=0;
+const CACHE_KEY='termo_dict_v1'; // lista de 5 letras salva no navegador: abre rápido e funciona sem internet
+function decode(buf){let t=new TextDecoder('utf-8').decode(buf);if(t.includes('\uFFFD'))t=new TextDecoder('iso-8859-1').decode(buf);return t}
+function addWords(txt){
+  const toks=txt.toLowerCase().normalize('NFC').match(/[a-zà-öø-ÿ]+/g)||[];let n0=0;
+  for(const w of toks){
+    if(w.length!==5)continue;const n=strip(w);if(!/^[a-z]{5}$/.test(n))continue;
+    // se a forma sem acento também existe (ex.: "sabia"), ela tem preferência na exibição
+    if(!FULL.has(n)||(w===n&&!DICT.has(n)))FULL.set(n,w);
+    n0++;
+  }
+  return n0;
+}
+function setDictReady(){dictReady=true;const el=document.getElementById('dictInfo');if(el)el.textContent=dictInfo()}
+async function loadDict(){
+  try{const c=localStorage.getItem(CACHE_KEY);if(c&&addWords(c)>2000)return setDictReady()}catch(e){}
+  dictTries++;
+  const res=await Promise.allSettled(SOURCES.map(async url=>{
+    const r=await fetch(url);if(!r.ok)throw new Error(r.status);
+    return addWords(decode(await r.arrayBuffer()));
+  }));
+  const total=res.reduce((s,r)=>s+(r.status==='fulfilled'?r.value:0),0);
+  if(total>2000){
+    setDictReady();
+    if(res.every(r=>r.status==='fulfilled'))try{localStorage.setItem(CACHE_KEY,[...FULL.values()].join(' '))}catch(e){}
+  }else{
+    // sem dicionário o jogo não aceita palavras: tenta de novo sozinho
+    if(dictTries===1)toast('Sem conexão com o dicionário — tentando de novo…');
+    setTimeout(loadDict,Math.min(30000,4000*dictTries));
+  }
+}
+function dictInfo(){return dictReady?`${FULL.size.toLocaleString('pt-BR')} palavras de 5 letras aceitas · partidas ilimitadas`:'Carregando dicionário completo…'}
+
+/* RANKING (Supabase): cada partida terminada (ou abandonada) vira uma linha na tabela "partidas" */
+const SUPABASE_URL='https://ufelsrqopznduqfszxkl.supabase.co';  // ex.: https://abcdefgh.supabase.co  (Project Settings → Data API)
+const SUPABASE_KEY='sb_publishable_GFynLLu04zhB7Jff9jUcOQ_fo6kceZb';  // a chave PUBLISHABLE (sb_publishable_…). Nunca a secret/service_role
+const getNome=()=>($('#nome').value||'').trim();
+function registrarPartida(resultado){
+  const p={nome:getNome()||'Anônimo',modo:MODES[S.n].name,resultado,tentativas:S.guesses.length,max_tentativas:S.tries,
+    acertos:S.solved.filter(x=>x>=0).length,palavras:S.ans.map(a=>DICT.get(a))};
+  if(!SUPABASE_URL||!SUPABASE_KEY)return;
+  fetch(SUPABASE_URL+'/rest/v1/partidas',{method:'POST',keepalive:true,
+    headers:{'Content-Type':'application/json',apikey:SUPABASE_KEY,Prefer:'return=minimal'},body:JSON.stringify(p)})
+    .then(r=>{if(!r.ok)r.text().then(t=>console.warn('Ranking: falha ao registrar',r.status,t))})
+    .catch(e=>console.warn('Ranking: sem conexão',e));
+}
+const MODES={1:{name:'Termo',tries:6},2:{name:'Dueto',tries:7},4:{name:'Quarteto',tries:9}};
+const CFG={light:false,cb:false};
+const STATS={};
+[1,2,4].forEach(n=>STATS[n]={played:0,wins:0,streak:0,best:0,dist:Array(MODES[n].tries).fill(0),fail:0});
+const RANK={c:3,p:2,a:1};
+const $=s=>document.querySelector(s);
+let S={},DOM=[];
+
+function evaluate(g,a){const r=Array(5).fill('a'),cnt={};for(let i=0;i<5;i++){if(g[i]===a[i])r[i]='c';else cnt[a[i]]=(cnt[a[i]]||0)+1}for(let i=0;i<5;i++){if(r[i]!=='c'&&cnt[g[i]]>0){r[i]='p';cnt[g[i]]--}}return r}
+
+function newGame(n){
+  n=n||S.n||1;
+  // trocar de palavra/modo com partida começada = desistência, conta como derrota
+  if(S.n&&!S.over&&S.guesses.length){
+    if(!S.quitArmed||Date.now()-S.quitArmed>3000){
+      S.quitArmed=Date.now();
+      return toast('Partida em andamento — clique de novo para desistir (conta como derrota)');
+    }
+    const st=STATS[S.n];st.played++;st.streak=0;st.fail++;
+    registrarPartida('desistencia');
+    toast('Desistência registrada como derrota');
+  }
+  closeModal();
+  const pool=[...WORDS],ans=[];
+  while(ans.length<n){const w=pool.splice(Math.floor(Math.random()*pool.length),1)[0];ans.push(w)}
+  S={n,tries:MODES[n].tries,ans,guesses:[],disp:[],evals:ans.map(()=>[]),solved:ans.map(()=>-1),cur:Array(5).fill(''),pos:0,over:false,busy:false,win:false};
+  document.querySelectorAll('#modes button').forEach(b=>b.classList.toggle('on',+b.dataset.n===n));
+  buildBoards();buildKeyboard();layout();renderAll();
+}
+
+function buildBoards(){
+  const wrap=$('#boards');wrap.innerHTML='';DOM=[];
+  for(let b=0;b<S.n;b++){
+    const bd=document.createElement('div');bd.className='board';const rows=[];
+    for(let r=0;r<S.tries;r++){
+      const row=document.createElement('div');row.className='row';const tiles=[];
+      for(let c=0;c<5;c++){const t=document.createElement('div');t.className='tile';
+        t.onclick=()=>{if(canType()&&r===S.guesses.length&&S.solved[b]<0){S.pos=c;renderAll()}};
+        row.appendChild(t);tiles.push(t)}
+      bd.appendChild(row);rows.push({el:row,tiles});
+    }
+    const an=document.createElement('div');an.className='ans';bd.appendChild(an);
+    wrap.appendChild(bd);DOM.push({el:bd,rows,ans:an});
+  }
+}
+
+function layout(){
+  const m=$('#main'),W=m.clientWidth-24,H=m.clientHeight-24,R=S.tries,n=S.n;
+  const opts=n===1?[[1,1]]:n===2?[[2,1],[1,2]]:[[4,1],[2,2]];
+  let best=0,bc=1;
+  for(const[c,r]of opts){
+    const extra=S.over?.6:0;
+    const t=Math.min(W/(c*5.48+(c-1)*.8),H/(r*(R+(R-1)*.12+extra)+(r-1)*.8));
+    if(t>best){best=t;bc=c}
+  }
+  best=Math.max(14,Math.min(best,100));
+  document.documentElement.style.setProperty('--t',best.toFixed(2)+'px');
+  $('#boards').style.gridTemplateColumns=`repeat(${bc},auto)`;
+}
+
+function renderAll(reveal=-1){
+  const G=S.guesses.length;
+  for(let b=0;b<S.n;b++){
+    const D=DOM[b],sv=S.solved[b];
+    D.el.classList.toggle('done',sv>=0);
+    D.ans.textContent=(S.over&&sv<0)?S.ans[b]&&DICT.get(S.ans[b]):'';
+    for(let r=0;r<S.tries;r++)for(let c=0;c<5;c++){
+      const t=D.rows[r].tiles[c];let cls='tile',txt='';
+      t.style.animationDelay='';t.style.transitionDelay='';
+      if(sv>=0&&r>sv)cls+=' off';
+      else if(r<G){
+        txt=[...S.disp[r]][c];cls+=' '+S.evals[b][r][c];
+        if(r===reveal){cls+=' flip';t.style.animationDelay=c*220+'ms';t.style.transitionDelay=(c*220+250)+'ms'}
+      }else if(r===G&&!S.over&&sv<0){
+        cls+=' cur';txt=S.cur[c];if(txt)cls+=' filled';if(c===S.pos)cls+=' cursor';
+      }else cls+=' empty';
+      t.className=cls;t.textContent=txt;
+    }
+  }
+}
+
+function canType(){return !S.over&&!S.busy&&$('#ov').classList.contains('hidden')}
+
+function type(L){
+  if(!canType())return;
+  S.cur[S.pos]=L;
+  let nx=-1;for(let i=S.pos+1;i<5;i++)if(!S.cur[i]){nx=i;break}
+  if(nx<0)nx=Math.min(S.pos+1,4);
+  S.pos=nx;renderAll();
+}
+function back(){
+  if(!canType())return;
+  if(S.cur[S.pos])S.cur[S.pos]='';
+  else if(S.pos>0){S.pos--;S.cur[S.pos]=''}
+  renderAll();
+}
+function move(d){if(!canType())return;S.pos=Math.max(0,Math.min(4,S.pos+d));renderAll()}
+
+function shake(msg){
+  toast(msg);const r=S.guesses.length;
+  DOM.forEach((D,b)=>{if(S.solved[b]<0){const el=D.rows[r].el;el.classList.remove('shake');void el.offsetWidth;el.classList.add('shake')}});
+}
+
+function submit(){
+  if(S.over){newGame();return}
+  if(!canType())return;
+  if(S.cur.some(x=>!x))return shake('Só palavras com 5 letras');
+  const g=S.cur.join('');
+  if(!dictReady)return shake('Carregando dicionário… tente em instantes');
+  if(!FULL.has(g))return shake('Palavra não encontrada');
+  const r=S.guesses.length,disp=FULL.get(g)||g,newly=[];
+  S.guesses.push(g);S.disp.push(disp);
+  for(let b=0;b<S.n;b++)if(S.solved[b]<0){S.evals[b][r]=evaluate(g,S.ans[b]);if(g===S.ans[b]){S.solved[b]=r;newly.push(b)}}
+  S.cur=Array(5).fill('');S.pos=0;S.busy=true;
+  const all=S.solved.every(x=>x>=0),lost=!all&&S.guesses.length>=S.tries;
+  S.over=all||lost;S.win=all;
+  renderAll(r);
+  setTimeout(()=>{
+    S.busy=false;updateKeys();
+    if(S.over)layout();
+    renderAll();
+    newly.forEach(b=>DOM[b].rows[r].tiles.forEach((t,c)=>{t.classList.add('bounce');t.style.animationDelay=c*90+'ms'}));
+    if(newly.length&&!S.over&&S.n>1)toast('Acertou '+DICT.get(S.ans[newly[0]]).toUpperCase()+'!');
+    if(S.over)finish();
+  },5*220+450);
+}
+
+function finish(){
+  const st=STATS[S.n];st.played++;
+  if(S.win){st.wins++;st.streak++;st.best=Math.max(st.best,st.streak);st.dist[S.guesses.length-1]++;
+    toast(['Genial!','Magnífico!','Impressionante!','Excelente!','Muito bem!','Ufa!','Na trave!','Por pouco!','Salvo!'][Math.min(S.guesses.length-1,8)]);}
+  else{st.streak=0;st.fail++;toast('Não foi dessa vez')}
+  registrarPartida(S.win?'vitoria':'derrota');
+  if(!getNome()){$('#nmBox').classList.add('need');setTimeout(()=>toast('Coloque seu nome para entrar no ranking'),600)}
+  setTimeout(()=>showStats(true),1100);
+}
+
+/* KEYBOARD */
+const ICON_BACK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M21 5H9l-6 7 6 7h12z"/><path d="M17 9l-5 6M12 9l5 6" stroke-linecap="round"/></svg>';
+function buildKeyboard(){
+  const kb=$('#kb');kb.innerHTML='';
+  ['qwertyuiop','asdfghjkl<','zxcvbnm>'].forEach((row,i)=>{
+    const rd=document.createElement('div');rd.className='krow';
+    if(i===2){const sp=document.createElement('div');sp.className='spacer';rd.appendChild(sp)}
+    for(const k of row){
+      const b=document.createElement('button');b.className='key';b.dataset.k=k;
+      if(k==='<'){b.innerHTML=ICON_BACK;b.onclick=back;b.title='Apagar'}
+      else if(k==='>'){b.classList.add('wide');b.innerHTML='<span>ENTER</span>';b.onclick=submit}
+      else{
+        for(let s=0;s<S.n;s++){const g=document.createElement('div');g.className='seg';
+          if(S.n===1)g.style.inset='0';
+          else if(S.n===2)Object.assign(g.style,{top:0,bottom:0,left:s?'50%':0,width:'50%'});
+          else Object.assign(g.style,{top:s<2?0:'50%',left:s%2?'50%':0,width:'50%',height:'50%'});
+          b.appendChild(g)}
+        const sp=document.createElement('span');sp.textContent=k;b.appendChild(sp);
+        b.onclick=()=>type(k);
+      }
+      b.addEventListener('mousedown',e=>e.preventDefault());
+      rd.appendChild(b);
+    }
+    kb.appendChild(rd);
+  });
+}
+function updateKeys(){
+  document.querySelectorAll('.key').forEach(k=>{
+    const L=k.dataset.k;if(L.length!==1||L==='<'||L==='>')return;
+    const segs=k.querySelectorAll('.seg');let lit=false,dead=true;
+    for(let b=0;b<S.n;b++){
+      let best='';
+      S.evals[b].forEach((ev,r)=>{if(!ev)return;for(let c=0;c<5;c++)if(S.guesses[r][c]===L&&(!best||RANK[ev[c]]>RANK[best]))best=ev[c]});
+      segs[b].className='seg'+(best?' '+best:'');
+      if(best==='c'||best==='p')lit=true;
+      if(best!=='a'&&!(S.solved[b]>=0&&best===''))dead=false;
+    }
+    k.classList.toggle('lit',lit);k.classList.toggle('dead',dead&&!lit);
+  });
+}
+
+/* UI */
+function toast(msg){const d=document.createElement('div');d.className='tm';d.textContent=msg;$('#toast').prepend(d);setTimeout(()=>d.remove(),1800)}
+function openModal(html){$('#mc').innerHTML=html;$('#ov').classList.remove('hidden')}
+function closeModal(){$('#ov').classList.add('hidden')}
+
+function ex(word,marks){return '<div class="ex">'+[...word].map((l,i)=>`<div class="tile ${marks[i]||''}">${l}</div>`).join('')+'</div>'}
+function showHelp(){
+  openModal(`<h2>Como jogar</h2>
+  <p>Descubra a palavra certa. Depois de cada tentativa, as letras mostram o quão perto você está.</p>
+  ${ex('turma',['c'])}<p><b>T</b> faz parte da palavra e está na posição correta.</p>
+  ${ex('viola',['','','p'])}<p><b>O</b> faz parte da palavra, mas em outra posição.</p>
+  ${ex('pulso',['','','','a'])}<p><b>S</b> não faz parte da palavra.</p>
+  <h3>Modos</h3>
+  <ul><li><b>Termo</b> — 1 palavra em 6 tentativas.</li><li><b>Dueto</b> — 2 palavras ao mesmo tempo em 7 tentativas.</li><li><b>Quarteto</b> — 4 palavras ao mesmo tempo em 9 tentativas.</li></ul>
+  <h3>Dicas de controle</h3>
+  <ul><li>Clique em qualquer quadrado da linha atual para escolher onde a próxima letra entra — sem precisar confirmar.</li>
+  <li>Use <kbd>←</kbd> <kbd>→</kbd> para mover o cursor, <kbd>Backspace</kbd> para apagar e <kbd>Enter</kbd> para enviar.</li>
+  <li>Acentos e cedilha são preenchidos automaticamente.</li>
+  <li>No Dueto e Quarteto, cada tecla é dividida em partes — uma cor para cada palavra.</li>
+  <li>Palavras <b>ilimitadas</b>: ao terminar, aperte <kbd>Enter</kbd> ou ↻ para jogar de novo.</li>
+  <li>Trocar de palavra ou de modo no meio da partida conta como <b>derrota</b>.</li>
+  <li>Coloque seu nome no campo do topo para entrar no ranking.</li></ul>
+  <div class="btns"><button class="btn pri" onclick="closeModal()">Jogar</button></div>`);
+}
+
+function share(){
+  const em={c:'🟩',p:'🟨',a:'⬛'};
+  let txt=`TERMO ∞ — ${MODES[S.n].name} ${S.win?S.guesses.length:'X'}/${S.tries}\n`;
+  for(let b=0;b<S.n;b++){txt+='\n';S.evals[b].forEach(ev=>{if(ev)txt+=ev.map(x=>em[x]).join('')+'\n'})}
+  const done=()=>toast('Resultado copiado!');
+  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(txt).then(done,()=>fallback(txt,done));else fallback(txt,done);
+}
+function fallback(txt,done){const t=document.createElement('textarea');t.value=txt;document.body.appendChild(t);t.select();try{document.execCommand('copy');done()}catch(e){toast('Não foi possível copiar')}t.remove()}
+
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); // nomes vêm de qualquer jogador
+let rankReq=0;
+async function showRanking(n){
+  const modo=MODES[n].name,req=++rankReq;
+  openModal(`<h2>🏆 Ranking</h2>
+  <div class="rk-tabs">${[1,2,4].map(m=>`<button class="${m===n?'on':''}" onclick="showRanking(${m})">${MODES[m].name}</button>`).join('')}</div>
+  <div id="rkBody"><p class="rk-msg">Carregando…</p></div>
+  <p style="color:var(--muted);font-size:12px;margin:14px 0 0">Ordem: mais vitórias → maior % de vitórias → menos tentativas em média. Partidas abandonadas contam como derrota.</p>`);
+  const body=$('#rkBody');
+  if(!SUPABASE_URL||!SUPABASE_KEY){body.innerHTML='<p class="rk-msg">Ranking ainda não conectado.</p>';return}
+  try{
+    const q=`modo=eq.${encodeURIComponent(modo)}&nome=neq.${encodeURIComponent('Anônimo')}&order=vitorias.desc,pct_vitorias.desc,media_tentativas.asc.nullslast,jogos.desc&limit=20`;
+    const r=await fetch(`${SUPABASE_URL}/rest/v1/ranking?select=*&${q}`,{headers:{apikey:SUPABASE_KEY}});
+    if(!r.ok)throw new Error(r.status);
+    const rows=await r.json();
+    if(req!==rankReq||!$('#rkBody'))return; // trocou de aba ou fechou enquanto carregava
+    if(!rows.length){body.innerHTML=`<p class="rk-msg">Ninguém jogou ${modo} ainda. Seja o primeiro!</p>`;return}
+    const me=getNome().toLowerCase(),med=['🥇','🥈','🥉'];
+    body.innerHTML=`<table class="rk"><thead><tr><th>#</th><th>Nome</th><th>Vit.</th><th>Jogos</th><th>%</th><th>Média</th></tr></thead><tbody>${
+      rows.map((x,i)=>`<tr class="${me&&x.nome.toLowerCase()===me?'me':''}"><td>${x.vitorias>0&&med[i]||i+1}</td><td title="${esc(x.nome)}">${esc(x.nome)}</td><td>${x.vitorias}</td><td>${x.jogos}</td><td>${x.pct_vitorias}%</td><td>${x.media_tentativas==null?'—':Number(x.media_tentativas).toLocaleString('pt-BR')}</td></tr>`).join('')
+    }</tbody></table>`;
+  }catch(e){if(req===rankReq&&$('#rkBody'))body.innerHTML='<p class="rk-msg">Não foi possível carregar o ranking. Verifique a internet.</p>'}
+}
+
+function showStats(end){
+  const st=STATS[S.n],max=Math.max(1,...st.dist,st.fail);
+  let head='';
+  if(end){
+    head=`<h2>${S.win?'Parabéns! 🎉':'Não foi dessa vez'}</h2>
+    <p>${S.n>1?'As palavras eram:':'A palavra era:'}</p>
+    <div class="words">${S.ans.map((a,b)=>`<span class="wd ${S.solved[b]>=0?'ok':''}">${DICT.get(a)}</span>`).join('')}</div>`;
+  }else head=`<h2>Estatísticas — ${MODES[S.n].name}</h2>`;
+  const bars=st.dist.map((v,i)=>`<div class="dr"><span>${i+1}</span><div class="bar ${end&&S.win&&S.guesses.length===i+1?'hi':''}" style="width:${Math.max(7,v/max*100)}%">${v}</div></div>`).join('')
+    +`<div class="dr"><span>💀</span><div class="bar" style="width:${Math.max(7,st.fail/max*100)}%">${st.fail}</div></div>`;
+  openModal(`${head}
+  <h3>${end?'Estatísticas — '+MODES[S.n].name:'Resumo'}</h3>
+  <div class="stats"><div><b>${st.played}</b><small>jogos</small></div><div><b>${st.played?Math.round(st.wins/st.played*100):0}%</b><small>vitórias</small></div><div><b>${st.streak}</b><small>sequência</small></div><div><b>${st.best}</b><small>melhor seq.</small></div></div>
+  <h3>Distribuição de tentativas</h3><div class="dist">${bars}</div>
+  <div class="btns">${S.over?'<button class="btn" onclick="share()">Compartilhar</button>':''}<button class="btn" onclick="showRanking(S.n)">🏆 Ranking</button><button class="btn pri" onclick="newGame()">Nova palavra ↻</button></div>`);
+}
+
+function showSettings(){
+  const tg=(id,title,desc)=>`<label class="tg"><div><b>${title}</b><small>${desc}</small></div><span class="sw"><input type="checkbox" id="${id}" ${CFG[id]?'checked':''}><i></i></span></label>`;
+  openModal(`<h2>Configurações</h2>
+  ${tg('light','Tema claro','Alterna entre fundo escuro e claro.')}
+  ${tg('cb','Alto contraste','Cores para daltonismo: laranja e azul.')}
+  <p id="dictInfo" style="color:var(--muted);font-size:13px;margin-top:16px">${dictInfo()}</p>`);
+  ['light','cb'].forEach(id=>$('#'+id).onchange=e=>{CFG[id]=e.target.checked;applyCfg()});
+}
+function applyCfg(){document.body.classList.toggle('light',CFG.light);document.body.classList.toggle('cb',CFG.cb)}
+
+/* EVENTS */
+document.addEventListener('keydown',e=>{
+  if(e.ctrlKey||e.metaKey||e.altKey)return;
+  if(e.target.id==='nome'){if(e.key==='Enter'||e.key==='Escape')e.target.blur();return} // digitando o nome, não joga
+  if(!$('#ov').classList.contains('hidden')){
+    if(e.key==='Escape')closeModal();
+    else if(e.key==='Enter'&&S.over){e.preventDefault();newGame()}
+    return;
+  }
+  const k=e.key;
+  if(k==='Enter'){e.preventDefault();submit()}
+  else if(k==='Backspace'){e.preventDefault();back()}
+  else if(k==='Delete'){if(canType()){S.cur[S.pos]='';renderAll()}}
+  else if(k==='ArrowLeft'){e.preventDefault();move(-1)}
+  else if(k==='ArrowRight'||k===' '){e.preventDefault();move(1)}
+  else if(k==='Home'){move(-5)}else if(k==='End'){move(5)}
+  else if(k.length===1){const n=strip(k);if(/^[a-z]$/.test(n))type(n)}
+});
+document.querySelectorAll('#modes button').forEach(b=>b.onclick=()=>{b.blur();newGame(+b.dataset.n)});
+$('#bNew').onclick=e=>{e.currentTarget.blur();newGame()};
+$('#bHelp').onclick=showHelp;
+$('#bStats').onclick=()=>showStats(S.over);
+$('#bRank').onclick=()=>showRanking(S.n);
+$('#bSet').onclick=showSettings;
+$('#bClose').onclick=closeModal;
+$('#ov').onclick=e=>{if(e.target.id==='ov')closeModal()};
+try{$('#nome').value=localStorage.getItem('termo_nome')||''}catch(e){}
+$('#nome').oninput=e=>{$('#nmBox').classList.remove('need');try{localStorage.setItem('termo_nome',e.target.value.trim())}catch(err){}};
+new ResizeObserver(()=>S.n&&layout()).observe($('#main'));
+
+newGame(1);
+showHelp();
+loadDict();
+</script>
+</body>
+</html>
