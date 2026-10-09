@@ -6,6 +6,8 @@
 <title>TERMO ∞ — Termo, Dueto e Quarteto</title>
 <meta name="description" content="Jogo de palavras em português com partidas ilimitadas: Termo, Dueto e Quarteto.">
 <meta name="theme-color" content="#15141c">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3296819379737937"
+     crossorigin="anonymous"></script>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%232fae8f'/%3E%3Ctext x='50' y='72' font-size='64' font-weight='900' font-family='Arial' fill='white' text-anchor='middle'%3ET%3C/text%3E%3C/svg%3E">
 <style>
 :root{
@@ -437,6 +439,7 @@ function showHelp(){
   <li>Palavras <b>ilimitadas</b>: ao terminar, aperte <kbd>Enter</kbd> ou ↻ para jogar de novo.</li>
   <li>Trocar de palavra ou de modo no meio da partida conta como <b>derrota</b>.</li>
   <li>Coloque seu nome no campo do topo para entrar no ranking.</li></ul>
+  <p style="color:var(--muted);font-size:13px;margin:14px 0 0">Este site exibe anúncios do Google. <a href="/privacidade" target="_blank" style="color:var(--accent)">Política de privacidade</a></p>
   <div class="btns"><button class="btn pri" onclick="closeModal()">Jogar</button></div>`);
 }
 
@@ -495,7 +498,8 @@ function showSettings(){
   openModal(`<h2>Configurações</h2>
   ${tg('light','Tema claro','Alterna entre fundo escuro e claro.')}
   ${tg('cb','Alto contraste','Cores para daltonismo: laranja e azul.')}
-  <p id="dictInfo" style="color:var(--muted);font-size:13px;margin-top:16px">${dictInfo()}</p>`);
+  <p id="dictInfo" style="color:var(--muted);font-size:13px;margin-top:16px">${dictInfo()}</p>
+  <p style="font-size:13px;margin:8px 0 0"><a href="/privacidade" target="_blank" style="color:var(--accent)">Política de privacidade</a></p>`);
   ['light','cb'].forEach(id=>$('#'+id).onchange=e=>{CFG[id]=e.target.checked;applyCfg()});
 }
 function applyCfg(){document.body.classList.toggle('light',CFG.light);document.body.classList.toggle('cb',CFG.cb)}
