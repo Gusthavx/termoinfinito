@@ -4,8 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>TERMO ∞ — Termo, Dueto e Quarteto</title>
-<meta name="description" content="Jogo de palavras em português com partidas ilimitadas: Termo, Dueto e Quarteto.">
+<meta name="description" content="Jogue TERMO ∞ grátis: adivinhe a palavra de 5 letras em português com partidas ilimitadas nos modos Termo, Dueto e Quarteto, ranking e dicas.">
 <meta name="theme-color" content="#15141c">
+<link rel="canonical" href="https://www.termoinfinito.online/">
+<meta name="google-adsense-account" content="ca-pub-3296819379737937">
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3296819379737937"
      crossorigin="anonymous"></script>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%232fae8f'/%3E%3Ctext x='50' y='72' font-size='64' font-weight='900' font-family='Arial' fill='white' text-anchor='middle'%3ET%3C/text%3E%3C/svg%3E">
@@ -25,7 +27,8 @@ body.light{
 }
 body.cb{--c:#f5793a;--p:#4fa3f7}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(--fg)}
+html,body{margin:0;width:100%;background:var(--bg);color:var(--fg)}
+body{overflow-x:hidden}
 #app{display:flex;flex-direction:column;width:100vw;height:100vh;height:100dvh}
 
 /* HEADER */
@@ -145,6 +148,27 @@ header{flex:0 0 auto;display:grid;grid-template-columns:1fr auto 1fr;align-items
 .sw input:checked+i{background:var(--accent)}
 .sw input:checked+i::after{transform:translateX(20px)}
 kbd{background:var(--key);border-radius:5px;padding:1px 6px;font-size:13px;font-family:inherit}
+
+/* CONTEÚDO ABAIXO DO JOGO */
+.info{max-width:720px;margin:0 auto;padding:40px 16px 24px;line-height:1.65;font-size:17px;border-top:1px solid var(--tile-border)}
+.info h1{font-size:clamp(24px,4.6vw,32px);line-height:1.2;margin:0 0 12px}
+.info h2{font-size:21px;margin:34px 0 10px}
+.info a{color:var(--accent)}
+.info ul,.info ol{padding-left:22px}
+.info li{margin:6px 0}
+.info .ex{--t:44px}
+.info details{border-bottom:1px solid var(--tile-border);padding:10px 0}
+.info summary{cursor:pointer;font-weight:700}
+.info details p{margin:8px 0 0;color:var(--fg)}
+.links{list-style:none;padding:0!important;display:grid;gap:10px}
+.links li{margin:0}
+.links a{display:block;padding:12px 14px;border:1px solid var(--tile-border);border-radius:12px;background:var(--bg2);text-decoration:none;color:var(--fg)}
+.links a:hover{border-color:var(--accent)}
+.links small{display:block;color:var(--muted);font-size:14px}
+.sitefoot{border-top:1px solid var(--tile-border);padding:24px 16px 36px;color:var(--muted);font-size:14px;text-align:center}
+.sitefoot nav{display:flex;flex-wrap:wrap;gap:6px 16px;justify-content:center;margin-bottom:12px}
+.sitefoot a{color:var(--muted);text-decoration:none}
+.sitefoot a:hover{color:var(--accent)}
 </style>
 </head>
 <body>
@@ -170,6 +194,51 @@ kbd{background:var(--key);border-radius:5px;padding:1px 6px;font-size:13px;font-
   <main id="main"><div id="boards"></div></main>
   <div id="kb"></div>
 </div>
+<section class="info" id="sobre-o-jogo">
+  <h1>TERMO ∞: adivinhe a palavra de 5 letras, quantas vezes quiser</h1>
+  <p>O TERMO ∞ é um jogo de palavras gratuito em português. Você tem algumas tentativas para descobrir uma palavra secreta de cinco letras, e as cores de cada letra mostram o quanto você chegou perto. Aqui não existe "volte amanhã": terminou uma partida, a próxima começa na hora.</p>
+
+  <h2>Como jogar</h2>
+  <p>Digite uma palavra de 5 letras que exista em português e aperte Enter. Depois, leia as cores:</p>
+  <div class="ex"><div class="tile c">t</div><div class="tile">u</div><div class="tile">r</div><div class="tile">m</div><div class="tile">a</div></div>
+  <p><b>Verde:</b> a letra está na palavra e na posição certa.</p>
+  <div class="ex"><div class="tile">v</div><div class="tile">i</div><div class="tile p">o</div><div class="tile">l</div><div class="tile">a</div></div>
+  <p><b>Amarelo:</b> a letra está na palavra, mas em outra posição.</p>
+  <div class="ex"><div class="tile">p</div><div class="tile">u</div><div class="tile">l</div><div class="tile a">s</div><div class="tile">o</div></div>
+  <p><b>Cinza:</b> a letra não está na palavra.</p>
+  <p>Acentos e cedilha são preenchidos sozinhos: escreva MARCO e o jogo entende MARÇO. O guia completo, com controles e ranking, está em <a href="/como-jogar">Como jogar</a>.</p>
+
+  <h2>Três modos de jogo</h2>
+  <ul>
+    <li><b>Termo:</b> 1 palavra em 6 tentativas.</li>
+    <li><b>Dueto:</b> 2 palavras ao mesmo tempo em 7 tentativas.</li>
+    <li><b>Quarteto:</b> 4 palavras ao mesmo tempo em 9 tentativas.</li>
+  </ul>
+  <p>No Dueto e no Quarteto cada palpite vale para todos os quadros. Veja como se organizar em <a href="/dueto-e-quarteto">Dueto e Quarteto</a>.</p>
+
+  <h2>Melhores palavras para começar</h2>
+  <p>Testamos cada uma das 655 palavras que podem ser resposta como primeiro chute. As que mais eliminam possibilidades são <b>SÉRIO</b>, <b>MARÇO</b>, <b>SOLAR</b>, <b>CALOR</b> e <b>LARGO</b>: depois delas sobram, em média, menos de 20 respostas possíveis. A tabela completa e a melhor dupla de abertura estão em <a href="/dicas">Dicas e estratégias</a>.</p>
+
+  <h2>Perguntas frequentes</h2>
+  <details><summary>O TERMO ∞ é grátis?</summary><p>Sim. Não precisa de cadastro nem de download, e funciona no navegador do computador e do celular. O site se mantém com anúncios.</p></details>
+  <details><summary>Quantas partidas posso jogar por dia?</summary><p>Quantas quiser. Ao terminar, aperte Enter ou o botão ↻ para uma nova palavra.</p></details>
+  <details><summary>Por que minha palavra não foi aceita?</summary><p>O jogo só aceita palavras que existem no dicionário, para que ninguém ganhe pistas com sequências inventadas. A tentativa não é gasta. Se você acha que a palavra deveria valer, avise pela página de <a href="/contato">contato</a>.</p></details>
+  <details><summary>Como entro no ranking?</summary><p>Escreva um nome ou apelido no campo do topo. Suas partidas passam a contar no ranking do modo que você está jogando.</p></details>
+  <details><summary>Trocar de palavra no meio conta como derrota?</summary><p>Sim. Se já houver tentativas, trocar de palavra ou de modo é registrado como desistência. O jogo pede um segundo clique para confirmar.</p></details>
+  <details><summary>Tem modo para daltonismo?</summary><p>Tem. Nas configurações, ative "Alto contraste" para trocar verde e amarelo por laranja e azul.</p></details>
+
+  <h2>Leia também</h2>
+  <ul class="links">
+    <li><a href="/artigos/letras-mais-comuns">As letras mais comuns nas palavras de 5 letras<small>Quais letras mais aparecem nas respostas e em que posição.</small></a></li>
+    <li><a href="/artigos/segunda-tentativa">Como escolher a segunda palavra<small>Quando trocar todas as letras e quando aproveitar as pistas.</small></a></li>
+    <li><a href="/artigos/letras-repetidas">Letras repetidas: como o jogo pinta cada uma<small>38% das respostas repetem alguma letra.</small></a></li>
+    <li><a href="/artigos">Todos os artigos<small>Estratégia, acentos, erros comuns e a história dos jogos de palavras.</small></a></li>
+  </ul>
+</section>
+<footer class="sitefoot">
+  <nav><a href="/como-jogar">Como jogar</a><a href="/dicas">Dicas</a><a href="/dueto-e-quarteto">Dueto e Quarteto</a><a href="/artigos">Artigos</a><a href="/sobre">Sobre</a><a href="/contato">Contato</a><a href="/privacidade">Privacidade</a><a href="/termos">Termos de uso</a></nav>
+  © 2026 TERMO ∞ · Jogo de palavras gratuito em português
+</footer>
 <div id="toast"></div>
 <div class="ov hidden" id="ov"><div class="card"><button class="ib x" id="bClose">✕</button><div id="mc"></div></div></div>
 
@@ -439,7 +508,8 @@ function showHelp(){
   <li>Palavras <b>ilimitadas</b>: ao terminar, aperte <kbd>Enter</kbd> ou ↻ para jogar de novo.</li>
   <li>Trocar de palavra ou de modo no meio da partida conta como <b>derrota</b>.</li>
   <li>Coloque seu nome no campo do topo para entrar no ranking.</li></ul>
-  <p style="color:var(--muted);font-size:13px;margin:14px 0 0">Este site exibe anúncios do Google. <a href="/privacidade" target="_blank" style="color:var(--accent)">Política de privacidade</a></p>
+  <p style="margin:14px 0 0">Quer jogar melhor? Veja o <a href="/como-jogar" style="color:var(--accent)">guia completo</a> e as <a href="/dicas" style="color:var(--accent)">melhores palavras para começar</a>.</p>
+  <p style="color:var(--muted);font-size:13px;margin:10px 0 0">Este site exibe anúncios do Google. <a href="/privacidade" target="_blank" style="color:var(--accent)">Política de privacidade</a></p>
   <div class="btns"><button class="btn pri" onclick="closeModal()">Jogar</button></div>`);
 }
 
